@@ -1,5 +1,6 @@
 const kdbxweb = require('kdbxweb');
 const phonetic = require('./phonetic');
+const emojis = require('emojis-list');
 
 const PasswordGenerator = {
     charRanges: {
@@ -25,6 +26,8 @@ const PasswordGenerator = {
                 return this.generateHash(64);
             case 'Mac':
                 return this.generateMac();
+            case 'Emoji':
+                return this.generateEmoji(opts);
         }
         const ranges = Object.keys(this.charRanges)
             .filter(r => opts[r])
@@ -89,6 +92,16 @@ const PasswordGenerator = {
             result += ch;
         }
         return result.substr(0, opts.length);
+    },
+
+    generateEmoji: function(opts) {
+        const randomBytes = kdbxweb.Random.getBytes(opts.length);
+        const chars = [];
+        for (let i = 0; i < opts.length; i++) {
+            const rand = Math.round(Math.random() * 1000) + randomBytes[i];
+            chars.push(emojis[rand % emojis.length]);
+        }
+        return _.shuffle(chars).join('');
     },
 
     deriveOpts: function(password) {
